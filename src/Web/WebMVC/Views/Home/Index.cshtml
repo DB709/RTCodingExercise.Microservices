@@ -1,7 +1,9 @@
 ﻿@using System.Globalization
+@using System.Data.SqlClient
 @using WebMVC.Models
 @model PlateListModel
 <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
 
 
 @{
@@ -38,7 +40,11 @@
                 <tr>
                     <th>Registration</th>
                     <th>Purchase Price</th>
-                    <th>Sale Price</th>
+                    <th>
+                        Sale Price 
+                            <a href="@Url.Action("Index", new { salePriceOrder = SortOrder.Ascending })" class="btn btn-secondary"><i class="bi bi-arrow-up"></i></a>
+                            <a href="@Url.Action("Index", new { salePriceOrder = SortOrder.Descending })" class="btn btn-secondary"><i class="bi bi-arrow-down"></i></a>
+                    </th>
                 </tr>
             </thead>
             <tbody>

@@ -18,12 +18,21 @@ namespace WebMVC.Services
             _options = options;
         }
 
-        public async Task<PlateListModel> GetPlatesAsync(int page)
+        public async Task<PlateListModel> GetPlatesAsync(int page, SortOrder saleSortOrder)
         {
             int pageSize = 20;
             int skip = (page - 1) * pageSize;
 
             var odataOptions = $"?$count=true&$skip={skip}";
+
+            if (saleSortOrder != SortOrder.Unspecified)
+            {
+                if (saleSortOrder == SortOrder.Ascending)
+                    odataOptions += "&$orderby=SalePrice asc";
+
+                if (saleSortOrder == SortOrder.Descending)
+                    odataOptions += "&$orderby=SalePrice desc";
+            }
 
             var response = await _httpClient.GetAsync($"http://catalog-api:80/{odataBaseUrl}{odataOptions}");
             response.EnsureSuccessStatusCode();

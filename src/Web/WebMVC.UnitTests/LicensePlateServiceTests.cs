@@ -15,6 +15,7 @@ using System.Threading;
 using WebMVC.Services;
 using System.Linq;
 using WebMVC.Models;
+using System.Data.SqlClient;
 
 namespace WebMVC.UnitTests
 {
@@ -39,9 +40,9 @@ namespace WebMVC.UnitTests
 
             _expectedPlates = new List<Plate>
             {
-                new() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M },
-                new() {  Id = Guid.NewGuid(), Registration = "MX93 XTY", Letters = "MX", Numbers = 93, PurchasePrice = 570.93M, SalePrice = 624.00M },
-                new() {  Id = Guid.NewGuid(), Registration = "LK32 XTY", Letters = "LK", Numbers = 32, PurchasePrice = 989.57M, SalePrice = 1245.00M }
+                new() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 1245.00M },
+                new() {  Id = Guid.NewGuid(), Registration = "MX93 XTY", Letters = "MX", Numbers = 93, PurchasePrice = 570.93M, SalePrice = 125.00M },
+                new() {  Id = Guid.NewGuid(), Registration = "LK32 XTY", Letters = "LK", Numbers = 32, PurchasePrice = 989.57M, SalePrice =  624.00M }
             };
         }
 
@@ -61,7 +62,7 @@ namespace WebMVC.UnitTests
                 .ReturnsAsync(responseMessage);
 
             // Act
-            var actualPlates = await _licensePlateService.GetPlatesAsync(1);
+            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified);
 
             // Assert
             Assert.NotNull(actualPlates);
@@ -86,7 +87,7 @@ namespace WebMVC.UnitTests
                 .ReturnsAsync(responseMessage);
 
             // Act
-            var actualPlates = await _licensePlateService.GetPlatesAsync(1);
+            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified);
 
             // Assert
             Assert.NotNull(actualPlates);

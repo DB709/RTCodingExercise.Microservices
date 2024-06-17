@@ -15,6 +15,7 @@ using System.Threading;
 using WebMVC.Services;
 using WebMVC.Models;
 using System.Linq;
+using System.Data.SqlClient;
 
 namespace WebMVC.UnitTests
 {
@@ -50,7 +51,7 @@ namespace WebMVC.UnitTests
             };
 
             // Arrange
-            _mockLicensePlateService.Setup(x => x.GetPlatesAsync(1)).ReturnsAsync(expectedPlateList);
+            _mockLicensePlateService.Setup(x => x.GetPlatesAsync(1, SortOrder.Unspecified)).ReturnsAsync(expectedPlateList);
 
             // Act
             var result = await _controller.Index();
