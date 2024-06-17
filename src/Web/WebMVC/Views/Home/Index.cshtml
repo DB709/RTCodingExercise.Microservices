@@ -35,16 +35,31 @@
         <h3>Add License Plate</h3>
         @using (Html.BeginForm("AddLicensePlate", "Home", FormMethod.Post))
         {
-            <label for="registration">Registration:</label>
-            <input type="text" id="registration" name="Registration" required />
+            <div class="form-floating mb-3">
+                <input class="form-control" type="text" id="registration" name="Registration" required />
+                <label for="registration">Registration:</label>
+            </div>
 
-            <label for="purchasePrice">Purchase Price:</label>
-            <input type="number" id="purchasePrice" name="PurchasePrice" required />
+            <div class="form-floating mb-3">
+                <input class="form-control" type="number" id="purchasePrice" name="PurchasePrice" required />
+                <label for="purchasePrice">Purchase Price:</label>
+            </div>
+                <div class="form-floating mb-3">
+                <input class="form-control" type="number" id="salePrice" name="SalePrice" required />
+                <label for="salePrice">Sale Price:</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input class="form-control" type="text" id="letters" name="Letters" required />
+                <label for="letters">Letters:</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input class="form-control" type="number" id="numbers" name="Numbers" required />
+                <label for="numbers">Numbers:</label>
+            </div>
 
-            <label for="salePrice">Sale Price:</label>
-            <input type="number" id="salePrice" name="SalePrice" required />
 
             <input type="submit" class="btn btn-primary" value="Add" />
+            <button type="button" id="cancelAddLicensePlate" class="btn btn-danger">Cancel</button>
         }
     </div>
     <div>
