@@ -4,7 +4,7 @@ namespace WebMVC.Services
 {
     public interface ILicensePlateService
     {
-        Task<PlateListModel> GetPlatesAsync(int page, SortOrder saleSortOrder);
+        Task<PlateListModel> GetPlatesAsync(int page, SortOrder saleSortOrder, string searchText);
         Task AddLicensePlate(Plate model);
     }
 }

@@ -14,9 +14,9 @@ namespace RTCodingExercise.Microservices.Controllers
             _licensePlateService = licensePlateService;
         }
 
-        public async Task<IActionResult> Index(int page = 1, SortOrder salePriceOrder = SortOrder.Unspecified)
+        public async Task<IActionResult> Index(string searchText, int page = 1, SortOrder salePriceOrder = SortOrder.Unspecified)
         {
-            return View(await _licensePlateService.GetPlatesAsync(page, salePriceOrder));
+            return View(await _licensePlateService.GetPlatesAsync(page, salePriceOrder, searchText));
         }
 
         [HttpPost]

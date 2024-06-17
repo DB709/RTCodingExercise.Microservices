@@ -15,8 +15,21 @@
 
 <div class="text-center">
     <h1 class="display-4">License Plate Search Engine</h1>
-    <div>
-        <button type="button" id="addLicensePlate" class="btn btn-primary">Add License Plate</button>
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            @using (Html.BeginForm("Index", "Home", FormMethod.Get))
+            {
+                <div class="input-group">
+                    <input type="text" name="searchText" />
+                    <div class="input-group-append">
+                        <input type="submit" class="btn btn-primary" value="Search" />
+                    </div>
+                </div>
+            }
+        </div>
+        <div>
+            <button type="button" id="addLicensePlate" class="btn btn-primary float-right">Add License Plate</button>
+        </div>
     </div>
     <div id="addLicensePlateForm" style="display:none;">
         <h3>Add License Plate</h3>
@@ -31,7 +44,7 @@
             <label for="salePrice">Sale Price:</label>
             <input type="number" id="salePrice" name="SalePrice" required />
 
-            <input type="submit" value="Add" />
+            <input type="submit" class="btn btn-primary" value="Add" />
         }
     </div>
     <div>

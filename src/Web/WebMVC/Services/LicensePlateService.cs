@@ -9,8 +9,9 @@ namespace WebMVC.Services
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _options;
 
-        private const decimal VatMultiplier = 1.2M;
-        private const string odataBaseUrl = "odata/Plate";
+        private const decimal _vatMultiplier = 1.2M;
+        private const string _odataBaseUrl = "odata/Plate";
+        private const int _pageSize = 20;
 
         public LicensePlateService(IHttpClientFactory httpClientFactory, JsonSerializerOptions options)
         {
@@ -18,10 +19,38 @@ namespace WebMVC.Services
             _options = options;
         }
 
-        public async Task<PlateListModel> GetPlatesAsync(int page, SortOrder saleSortOrder)
+        public async Task<PlateListModel> GetPlatesAsync(int page, SortOrder saleSortOrder, string searchText)
         {
-            int pageSize = 20;
-            int skip = (page - 1) * pageSize;
+            var odataOptions = SetupOdataFilters(page, saleSortOrder, searchText);
+
+            var response = await _httpClient.GetAsync($"http://catalog-api:80/{_odataBaseUrl}{odataOptions}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+
+            var plates = JsonSerializer.Deserialize<PlateListModel>(content, _options);
+
+            if (plates?.Plates == null || !plates.Plates.Any())
+            {
+                return new PlateListModel();
+            }
+            
+            plates.Plates = plates.Plates.Select(x => { x.SalePrice = x.SalePrice * _vatMultiplier; return x; }).ToList();
+            plates.PageSize = _pageSize;
+            plates.CurrentPage = page;
+
+            return plates;
+        }
+
+        public async Task AddLicensePlate(Plate model)
+        {
+            var plate = JsonSerializer.Serialize(model);
+            var response = await _httpClient.PostAsync($"http://catalog-api:80/{_odataBaseUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+        }
+
+        private static string SetupOdataFilters(int page, SortOrder saleSortOrder, string searchText)
+        {
+            int skip = (page - 1) * _pageSize;
 
             var odataOptions = $"?$count=true&$skip={skip}";
 
@@ -34,29 +63,17 @@ namespace WebMVC.Services
                     odataOptions += "&$orderby=SalePrice desc";
             }
 
-            var response = await _httpClient.GetAsync($"http://catalog-api:80/{odataBaseUrl}{odataOptions}");
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-
-            var plates = JsonSerializer.Deserialize<PlateListModel>(content, _options);
-
-            if (plates?.Plates == null || !plates.Plates.Any())
+            if (!string.IsNullOrWhiteSpace(searchText)) 
             {
-                return new PlateListModel();
+                if (int.TryParse(searchText, out var numberSearch))
+                    odataOptions += $"&$filter=Numbers eq {numberSearch}";
+
+                if (!searchText.Any(x => char.IsDigit(x)))
+                    odataOptions += $"&$filter=Letters eq '{searchText}'";
             }
-            
-            plates.Plates = plates.Plates.Select(x => { x.SalePrice = x.SalePrice * VatMultiplier; return x; }).ToList();
-            plates.PageSize = pageSize;
-            plates.CurrentPage = page;
 
-            return plates;
-        }
 
-        public async Task AddLicensePlate(Plate model)
-        {
-            var plate = JsonSerializer.Serialize(model);
-            var response = await _httpClient.PostAsync($"http://catalog-api:80/{odataBaseUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
-            response.EnsureSuccessStatusCode();
+            return odataOptions;
         }
     }
 }
