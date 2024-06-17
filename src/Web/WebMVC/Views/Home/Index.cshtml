@@ -1,10 +1,106 @@
-﻿@model List<Catalog.Domain.Plate>
+﻿@using System.Globalization
+@using WebMVC.Models
+@model PlateListModel
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
 
 @{
     ViewData["Title"] = "Home Page";
 }
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">License Plate Search Engine</h1>
+    <div>
+        <button type="button" id="addLicensePlate" class="btn btn-primary">Add License Plate</button>
+    </div>
+    <div id="addLicensePlateForm" style="display:none;">
+        <h3>Add License Plate</h3>
+        @using (Html.BeginForm("AddLicensePlate", "Home", FormMethod.Post))
+        {
+            <label for="registration">Registration:</label>
+            <input type="text" id="registration" name="Registration" required />
+
+            <label for="purchasePrice">Purchase Price:</label>
+            <input type="number" id="purchasePrice" name="PurchasePrice" required />
+
+            <label for="salePrice">Sale Price:</label>
+            <input type="number" id="salePrice" name="SalePrice" required />
+
+            <input type="submit" value="Add" />
+        }
+    </div>
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Registration</th>
+                    <th>Purchase Price</th>
+                    <th>Sale Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var plate in Model.Plates)
+                {
+                    <tr>
+                        <td>@plate.Registration</td>
+                        <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                        <td>@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <ul class="pagination justify-content-evenly">
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item"><a class="page-link" href="@Url.Action("Index", new { page = i })">@i</a></li>
+        }
+        </ul>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#addLicensePlate').click(function () {
+                $('#addLicensePlateForm').show();
+            });
+            $('#addLicensePlateForm').validate({
+                rules: {
+                    Registration: {
+                        required: true,
+                        minlength: 2,
+                        maxlength: 7
+                    },
+                    PurchasePrice: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    },
+                    BuyPrice: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    }
+                },
+                messages: {
+                    Registration: {
+                        required: "Please enter the registration",
+                        minlength: "Registration must be at least 2 characters long",
+                        maxlength: "Registration must not exceed 7 characters"
+                    },
+                    PurchasePrice: {
+                        required: "Please enter the purchase price",
+                        number: "Sale price must be a number",
+                        min: "Sale price cannot be negative"
+                    },
+                    SalePrice: {
+                        required: "Please enter the sale price",
+                        number: "Sale price must be a number",
+                        min: "Sale price cannot be negative"
+                    }
+                }
+            });
+        });
+    </script>
 </div>

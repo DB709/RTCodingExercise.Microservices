@@ -1,6 +1,14 @@
-﻿using MassTransit;
+﻿using Catalog.API.Services;
+using MassTransit;
+using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
+using static Catalog.API.Data.PlateConsumer;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Catalog.API
 {
@@ -12,6 +20,13 @@ namespace Catalog.API
         }
 
         public IConfiguration Configuration { get; }
+
+        static IEdmModel GetEdmModel()
+        {
+            var odataBuilder = new ODataConventionModelBuilder();
+            odataBuilder.EntitySet<Plate>("Plate");
+            return odataBuilder.GetEdmModel();
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -45,14 +60,20 @@ namespace Catalog.API
                     .AllowAnyHeader()
                     .AllowCredentials());
             });
+            var edmModel = GetEdmModel();
 
-            services.AddControllers();
+            services.AddScoped<ILicensePlateRepository, LicensePlateRepository>();
+            services.AddScoped<ILicensePlateService, LicensePlateService>();
+            services.AddScoped<IDesignTimeDbContextFactory<ApplicationDbContext>, ApplicationDbContextFactory>();
+            services.AddControllers().AddOData(options => options.Select().Filter().OrderBy().Count().Expand().SetMaxTop(100).SkipToken().AddRouteComponents("odata", edmModel));
             services.AddControllersWithViews();
             services.AddRazorPages();
 
+            
+
             services.AddMassTransit(x =>
             {
-                //x.AddConsumer<ConsumerClass>();
+                x.AddConsumer<PlateConsumer>();
 
                 //ADD CONSUMERS HERE
                 x.UsingRabbitMq((context, cfg) =>

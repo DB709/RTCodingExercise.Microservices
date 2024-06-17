@@ -1,20 +1,34 @@
-﻿using RTCodingExercise.Microservices.Models;
+﻿using System.Text.Json;
+using RTCodingExercise.Microservices.Models;
 using System.Diagnostics;
+using WebMVC.Services;
 
 namespace RTCodingExercise.Microservices.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILicensePlateService _licensePlateService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILicensePlateService licensePlateService)
         {
-            _logger = logger;
+            _licensePlateService = licensePlateService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            return View();
+            return View(await _licensePlateService.GetPlatesAsync(page));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddLicensePlate(Plate model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Error();
+            }
+
+            await _licensePlateService.AddLicensePlate(model);
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()

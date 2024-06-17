@@ -1,5 +1,7 @@
 ﻿using MassTransit;
 using RabbitMQ.Client;
+using System.Text.Json;
+using WebMVC.Services;
 
 namespace RTCodingExercise.WebMVC
 {
@@ -18,6 +20,15 @@ namespace RTCodingExercise.WebMVC
             services.AddControllers();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages().AddRazorRuntimeCompilation();
+
+            services.AddSingleton(new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            services.AddScoped<ILicensePlateService, LicensePlateService>();
+
+            services.AddHttpClient();
 
             services.AddMassTransit(x =>
             {
