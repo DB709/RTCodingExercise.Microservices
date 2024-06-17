@@ -51,10 +51,10 @@ namespace WebMVC.UnitTests
             };
 
             // Arrange
-            _mockLicensePlateService.Setup(x => x.GetPlatesAsync(1, SortOrder.Unspecified)).ReturnsAsync(expectedPlateList);
+            _mockLicensePlateService.Setup(x => x.GetPlatesAsync(1, SortOrder.Unspecified, string.Empty)).ReturnsAsync(expectedPlateList);
 
             // Act
-            var result = await _controller.Index();
+            var result = await _controller.Index(string.Empty);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);

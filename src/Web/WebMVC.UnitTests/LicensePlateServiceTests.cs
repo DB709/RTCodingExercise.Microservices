@@ -62,7 +62,7 @@ namespace WebMVC.UnitTests
                 .ReturnsAsync(responseMessage);
 
             // Act
-            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified);
+            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified, string.Empty);
 
             // Assert
             Assert.NotNull(actualPlates);
@@ -87,7 +87,7 @@ namespace WebMVC.UnitTests
                 .ReturnsAsync(responseMessage);
 
             // Act
-            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified);
+            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified, string.Empty);
 
             // Assert
             Assert.NotNull(actualPlates);
