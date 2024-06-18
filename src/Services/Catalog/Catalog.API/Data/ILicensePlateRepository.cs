@@ -5,5 +5,7 @@
         IQueryable<Plate> GetAll();
 
         Task AddLicensePlateAsync(Plate plate);
+
+        Task UpdateLicensePlateAsync(Plate plate);
     }
 }

@@ -1,14 +1,10 @@
 using Catalog.API.Data;
 using Catalog.API.Services;
 using Catalog.Domain;
-using Microsoft.AspNetCore.OData.Query;
-using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -61,6 +57,21 @@ namespace Catalog.UnitTests
 
             // Assert
             _licensePlateRepositoryMock.Verify(x => x.AddLicensePlateAsync(newPlate), Times.Once());
+        }
+
+        [Fact]
+        public async Task UpdatePlate_IsSuccessful()
+        {
+            // Arrange
+            var updatedPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
+
+            _licensePlateRepositoryMock.Setup(x => x.UpdateLicensePlateAsync(updatedPlate));
+
+            // Act
+            await _licensePlateService.UpdateLicensePlate(updatedPlate);
+
+            // Assert
+            _licensePlateRepositoryMock.Verify(x => x.UpdateLicensePlateAsync(updatedPlate), Times.Once());
         }
     }
 }

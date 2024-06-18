@@ -7,5 +7,7 @@ namespace Catalog.API.Services
         IQueryable<Plate> GetAll();
 
         Task AddLicensePlate(Plate plate);
+
+        Task UpdateLicensePlate(Plate plate);
     }
 }

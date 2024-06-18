@@ -15,5 +15,7 @@ namespace Catalog.API.Services
         public IQueryable<Plate> GetAll() =>  _licensePlateRepository.GetAll();
 
         public async Task AddLicensePlate(Plate plate) => await _licensePlateRepository.AddLicensePlateAsync(plate);
+
+        public async Task UpdateLicensePlate(Plate plate) => await _licensePlateRepository.UpdateLicensePlateAsync(plate);
     }
 }

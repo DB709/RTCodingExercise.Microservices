@@ -69,7 +69,7 @@ namespace Catalog.UnitTests
             using var context = CreateContext();
             var licensePlateRepository = new LicensePlateRepository(context);
 
-            var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
+            var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK96 XSL", Letters = "LK", Numbers = 96, PurchasePrice = 100.57M, SalePrice = 125.00M };
             
             // Act
             await licensePlateRepository.AddLicensePlateAsync(newPlate);
@@ -80,5 +80,29 @@ namespace Catalog.UnitTests
             Assert.Contains(newPlate, plates);
         }
 
+        [Fact]
+        public async Task UpdatePlate_PlateUpdatedSuccessfully()
+        {
+            // Arrange 
+            using var context = CreateContext();
+            var licensePlateRepository = new LicensePlateRepository(context);
+
+            var testRegistration = "LK93 XTY";
+
+            var updatedPlate = _seedDataPlates.Single(x => x.Registration == testRegistration);
+
+            updatedPlate.SalePrice = 100000M;
+
+            // Act
+            await licensePlateRepository.UpdateLicensePlateAsync(updatedPlate);
+
+            var plates = context.Plates.ToList();
+            var actualPlate = plates.Single(x => x.Registration == testRegistration);
+
+            // Assert
+            Assert.Equal(_seedDataPlates.Count, plates.Count);
+            Assert.Contains(updatedPlate, plates);
+            Assert.Equal(updatedPlate.SalePrice, actualPlate.SalePrice);
+        }
     }
 }
