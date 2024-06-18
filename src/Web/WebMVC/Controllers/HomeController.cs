@@ -37,9 +37,9 @@ namespace RTCodingExercise.Microservices.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> AddPlateSale(Plate model)
+        public async Task<IActionResult> AddPlateSale(Plate model, string discountCode)
         {
-            await _licensePlateService.AddPlateSale(model);
+            await _licensePlateService.AddPlateSale(model, discountCode);
             return RedirectToAction("Index");
         }
 

@@ -68,7 +68,7 @@
     <div class="form-group">
         <label>Have Discount Code?</label>
         <div class="input-group"> <input type="text" class="form-control coupon" id="discount-code" placeholder="Discount code"><span class="input-group-append"><button id="apply-discount" class="btn btn-primary btn-apply coupon">Apply</button></span></div>
-        <input type="hidden" id="applied-discount-code" name="discountCode" value="">
+        <input type="hidden" id="applied-discount-code" name="applied-discount-code" value="">
         <div id="error-message" style="color: red; display: none;">Invalid discount code</div>
     </div>
     <div>
@@ -117,7 +117,7 @@
                         </td>
                         <td>@displayText</td>
                         <td><a class="btn @buttonClass" style="@buttonVisibility" href="@Url.Action("UpdateReservedStatus", plate)">@buttonText</a></td>
-                        <td><a class="btn btn-danger" style="@buttonVisibility" href="@Url.Action("AddPlateSale", plate)">Buy This Plate</a></td>
+                        <td><a class="btn btn-danger btn-buy" style="@buttonVisibility" href="@Url.Action("AddPlateSale", plate)">Buy This Plate</a></td>
                     </tr>
                 }
             </tbody>
@@ -138,6 +138,25 @@
             $('#cancelAddLicensePlate').click(function () {
                 $('#addLicensePlateForm').hide();
             });
+
+            $('.btn-buy').click(function (event) {
+                event.preventDefault(); // Prevent the default action
+                var discountCode = $('#discount-code').val();
+                var appliedDiscountCode = $('#applied-discount-code').val(); // Get the value from the hidden field
+                var originalPrice = parseFloat($(this).closest('tr').find('.original-price').text().replace('£', '').replace(',', ''));
+
+                var href = $(this).attr('href');
+                var newHref = href + (href.indexOf('?') >= 0 ? '&' : '?') + 'discountCode=' + encodeURIComponent(appliedDiscountCode);
+
+                if (discountCode === 'DISCOUNT' && originalPrice < 250) {
+                    var userConfirmation = window.confirm('Discount code is not applicable for items less than £250. Would you like to still purchase it?');
+                    if (userConfirmation) {
+                        window.location.href = newHref; // Redirect with the discount code in the URL
+                    }
+                } else {
+                    window.location.href = newHref; // Redirect with the discount code in the URL
+                }
+            });
             
             $(document).ready(function () {
                 $('#apply-discount').click(function () {
@@ -146,8 +165,7 @@
                     var isValidCode = checkDiscountCode(discountCode);
 
                     if (isValidCode) {
-
-                        $('#applied-dsicount-code').val = discountCode;
+                        $('#applied-discount-code').val(discountCode);
                         $('.table .original-price').each(function () {
                             var originalPrice = parseFloat($(this).text().replace('£', '').replace(',','')).toFixed(2)
                             var discountPrice = originalPrice;

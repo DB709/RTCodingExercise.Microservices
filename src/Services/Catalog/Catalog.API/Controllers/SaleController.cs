@@ -1,5 +1,4 @@
 ﻿using Catalog.API.Services;
-using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace Catalog.API.Controllers

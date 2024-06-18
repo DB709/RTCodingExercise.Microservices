@@ -27,6 +27,7 @@ namespace RTCodingExercise.WebMVC
             });
 
             services.AddScoped<ILicensePlateService, LicensePlateService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddHttpClient();
 

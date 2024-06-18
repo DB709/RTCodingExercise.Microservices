@@ -8,6 +8,6 @@ namespace WebMVC.Services
         Task AddLicensePlate(Plate model);
         Task UpdateReservedStatus(Plate model);
 
-        Task AddPlateSale(Plate model);
+        Task AddPlateSale(Plate model, string discountCode);
     }
 }
