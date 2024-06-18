@@ -25,6 +25,7 @@ namespace Catalog.API
         {
             var odataBuilder = new ODataConventionModelBuilder();
             odataBuilder.EntitySet<Plate>("Plate");
+            odataBuilder.EntitySet<Sale>("Sale");
             return odataBuilder.GetEdmModel();
         }
 
@@ -63,6 +64,7 @@ namespace Catalog.API
             var edmModel = GetEdmModel();
 
             services.AddScoped<ILicensePlateRepository, LicensePlateRepository>();
+            services.AddScoped<ISaleRepository, SaleRepository>();
             services.AddScoped<ILicensePlateService, LicensePlateService>();
             services.AddScoped<IDesignTimeDbContextFactory<ApplicationDbContext>, ApplicationDbContextFactory>();
             services.AddControllers().AddOData(options => options.Select().Filter().OrderBy().Count().Expand().SetMaxTop(100).SkipToken().AddRouteComponents("odata", edmModel));

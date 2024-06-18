@@ -9,5 +9,9 @@ namespace Catalog.API.Services
         Task AddLicensePlate(Plate plate);
 
         Task UpdateLicensePlate(Plate plate);
+
+        Task<decimal> GetSalesTotal();
+
+        Task MakeLicensePlateSale(Sale sale);
     }
 }

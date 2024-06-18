@@ -14,6 +14,9 @@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
 <div class="text-center">
+    <div class="form-floating mb-3">
+        <label>Total Revenue: @Model.TotalRevenue.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</label>
+    </div>
     <h1 class="display-4">License Plate Search Engine</h1>
     <div class="d-flex justify-content-between mb-3">
         <div>
@@ -80,26 +83,41 @@
                             <a href="@Url.Action("Index", new { salePriceOrder = SortOrder.Descending })" class="btn btn-secondary"><i class="bi bi-arrow-down"></i></a>
                     </th>
                     <th>
-                        Reserved
+                        For Sale
                     </th>
+                    <th></th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var plate in Model.Plates)
                 {
-                    var displayText = plate.Reserved ? "Reserved" : "Available";
+                    var displayText = "Available";
+                    if (plate.IsSold)
+                    {
+                        displayText = "Sold";
+                    }
+                    else if (plate.Reserved)
+                    {
+                        displayText = "Reserved";
+                    }
+
                     var buttonText = plate.Reserved ? "Release" : "Reserve This Plate";
                     var buttonClass = plate.Reserved ? "btn-danger" : "btn-primary";
+
+                    var buttonVisibility = plate.IsSold ? "display:none;" : "";
+
+
                     <tr>
                         <td>@plate.Registration</td>
                         <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
                         <td>
-                            <span class="original-price">@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</span>
+                            <span class="original-price">@((plate.SalePrice * 1.2M).ToString("C", CultureInfo.CreateSpecificCulture("en-GB")))</span>
                             <span class="discounted-price" style="display:none;"></span>
                         </td>
                         <td>@displayText</td>
-                        <td><a class="btn @buttonClass" href="@Url.Action("UpdateReservedStatus", plate, )">@buttonText</a></td>
+                        <td><a class="btn @buttonClass" style="@buttonVisibility" href="@Url.Action("UpdateReservedStatus", plate)">@buttonText</a></td>
+                        <td><a class="btn btn-danger" style="@buttonVisibility" href="@Url.Action("AddPlateSale", plate)">Buy This Plate</a></td>
                     </tr>
                 }
             </tbody>
