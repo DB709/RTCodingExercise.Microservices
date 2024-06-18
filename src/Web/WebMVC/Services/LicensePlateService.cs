@@ -74,12 +74,11 @@ namespace WebMVC.Services
             if (!string.IsNullOrWhiteSpace(searchText)) 
             {
                 if (int.TryParse(searchText, out var numberSearch))
-                    odataOptions += $"&$filter=Numbers eq {numberSearch}";
+                    odataOptions += $"&$filter=Numbers eq {numberSearch} and Reserved eq false";
 
                 if (!searchText.Any(x => char.IsDigit(x)))
-                    odataOptions += $"&$filter=Letters eq '{searchText}'";
+                    odataOptions += $"&$filter=Letters eq '{searchText}' and Reserved eq false";
             }
-
 
             return odataOptions;
         }
