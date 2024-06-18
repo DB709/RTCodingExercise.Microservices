@@ -20,7 +20,7 @@
             @using (Html.BeginForm("Index", "Home", FormMethod.Get))
             {
                 <div class="input-group">
-                    <input type="text" name="searchText" />
+                    <input type="text" name="searchText" class="form-control coupon" placeholder="Try your initials or DOB" />
                     <div class="input-group-append">
                         <input type="submit" class="btn btn-primary" value="Search" />
                     </div>
@@ -62,6 +62,12 @@
             <button type="button" id="cancelAddLicensePlate" class="btn btn-danger">Cancel</button>
         }
     </div>
+    <div class="form-group">
+        <label>Have Discount Code?</label>
+        <div class="input-group"> <input type="text" class="form-control coupon" id="discount-code" placeholder="Discount code"><span class="input-group-append"><button id="apply-discount" class="btn btn-primary btn-apply coupon">Apply</button></span></div>
+        <input type="hidden" id="applied-discount-code" name="discountCode" value="">
+        <div id="error-message" style="color: red; display: none;">Invalid discount code</div>
+    </div>
     <div>
         <table class="table">
             <thead>
@@ -88,7 +94,10 @@
                     <tr>
                         <td>@plate.Registration</td>
                         <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
-                        <td>@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                        <td>
+                            <span class="original-price">@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</span>
+                            <span class="discounted-price" style="display:none;"></span>
+                        </td>
                         <td>@displayText</td>
                         <td><a class="btn @buttonClass" href="@Url.Action("UpdateReservedStatus", plate)">@buttonText</a></td>
                     </tr>
@@ -112,6 +121,41 @@
                 $('#addLicensePlateForm').hide();
             });
             
+            $(document).ready(function () {
+                $('#apply-discount').click(function () {
+                    var discountCode = $('#discount-code').val();
+
+                    var isValidCode = checkDiscountCode(discountCode);
+
+                    if (isValidCode) {
+
+                        $('#applied-dsicount-code').val = discountCode;
+                        $('.table .original-price').each(function () {
+                            var originalPrice = parseFloat($(this).text().replace('£', '').replace(',','')).toFixed(2)
+                            var discountPrice = originalPrice;
+                            if (discountCode == "DISCOUNT") {
+                                discountedPrice = originalPrice - 25;
+                            }
+                            if (discountCode == "PERCENTOFF") {
+                                discountedPrice = originalPrice * 0.85;
+                            }
+
+                            $(this).css('text-decoration', 'line-through');
+                            $(this).next('.discounted-price').text('£' + discountedPrice.toFixed(2)).show();
+
+                            $('#error-message').hide();
+                        });
+                    }
+                    else {
+                        $('#applied-discount-code').val('');
+                        $('.table .original-price').each(function () {
+                            $(this).css('text-decoration', '');
+                            $(this).next('.discounted-price').text('').hide();
+                        });
+                        $('#error-message').show();
+                    }
+                });
+            });
             
             $('#addLicensePlateForm').validate({
                 rules: {
@@ -150,5 +194,9 @@
                 }
             });
         });
+
+        function checkDiscountCode(code) {
+            return code === 'DISCOUNT' || code === 'PERCENTOFF';
+        }
     </script>
 </div>
