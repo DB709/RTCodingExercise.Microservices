@@ -12,14 +12,16 @@ namespace Catalog.UnitTests
 {
     public class LicensePlateServiceTests
     {
-        private readonly Mock<ILicensePlateRepository> _licensePlateRepositoryMock;
+        private readonly Mock<ILicensePlateRepository> _mockLicensePlateRepository;
         private readonly ILicensePlateService _licensePlateService;
+        private readonly Mock<ISaleRepository> _mockSaleRepository;
 
         public LicensePlateServiceTests() 
         {
-            _licensePlateRepositoryMock = new Mock<ILicensePlateRepository>();
+            _mockLicensePlateRepository = new Mock<ILicensePlateRepository>();
+            _mockSaleRepository = new Mock<ISaleRepository>();
 
-            _licensePlateService = new LicensePlateService(_licensePlateRepositoryMock.Object);
+            _licensePlateService = new LicensePlateService(_mockLicensePlateRepository.Object, _mockSaleRepository.Object);
         }
         [Fact]
         public void GetAllPlates_ReturnsListOfPlates()
@@ -33,7 +35,7 @@ namespace Catalog.UnitTests
 
             }.AsQueryable();
 
-            _licensePlateRepositoryMock.Setup(x => x.GetAll()).Returns(expectedPlates);
+            _mockLicensePlateRepository.Setup(x => x.GetAll()).Returns(expectedPlates);
 
             // Act
             var actualPlates = _licensePlateService.GetAll();
@@ -50,13 +52,13 @@ namespace Catalog.UnitTests
             // Arrange
             var newPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
 
-            _licensePlateRepositoryMock.Setup(x => x.AddLicensePlateAsync(newPlate));
+            _mockLicensePlateRepository.Setup(x => x.AddLicensePlateAsync(newPlate));
 
             // Act
             await _licensePlateService.AddLicensePlate(newPlate);
 
             // Assert
-            _licensePlateRepositoryMock.Verify(x => x.AddLicensePlateAsync(newPlate), Times.Once());
+            _mockLicensePlateRepository.Verify(x => x.AddLicensePlateAsync(newPlate), Times.Once());
         }
 
         [Fact]
@@ -65,13 +67,13 @@ namespace Catalog.UnitTests
             // Arrange
             var updatedPlate = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
 
-            _licensePlateRepositoryMock.Setup(x => x.UpdateLicensePlateAsync(updatedPlate));
+            _mockLicensePlateRepository.Setup(x => x.UpdateLicensePlateAsync(updatedPlate));
 
             // Act
             await _licensePlateService.UpdateLicensePlate(updatedPlate);
 
             // Assert
-            _licensePlateRepositoryMock.Verify(x => x.UpdateLicensePlateAsync(updatedPlate), Times.Once());
+            _mockLicensePlateRepository.Verify(x => x.UpdateLicensePlateAsync(updatedPlate), Times.Once());
         }
     }
 }

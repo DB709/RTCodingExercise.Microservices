@@ -8,22 +8,23 @@ namespace WebMVC.Services
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _options;
+        private readonly IConfiguration _configuration;
 
-        private const decimal _vatMultiplier = 1.2M;
-        private const string _odataBaseUrl = "odata/Plate";
-        private const int _pageSize = 20;
+        private const string _odataPlateUrl = "odata/Plate";
+        private const string _odataSaleUrl = "odata/Sale";
 
-        public LicensePlateService(IHttpClientFactory httpClientFactory, JsonSerializerOptions options)
+        public LicensePlateService(IHttpClientFactory httpClientFactory, JsonSerializerOptions options, IConfiguration configuration)
         {
             _httpClient = httpClientFactory.CreateClient();
             _options = options;
+            _configuration = configuration;
         }
 
         public async Task<PlateListModel> GetPlatesAsync(int page, SortOrder saleSortOrder, string searchText)
         {
             var odataOptions = SetupOdataFilters(page, saleSortOrder, searchText);
 
-            var response = await _httpClient.GetAsync($"http://catalog-api:80/{_odataBaseUrl}{odataOptions}");
+            var response = await _httpClient.GetAsync($"{_configuration["CatalogAPIBaseUrl"]}{_odataPlateUrl}{odataOptions}");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
 
@@ -34,10 +35,10 @@ namespace WebMVC.Services
                 return new PlateListModel();
             }
             
-            plates.PageSize = _pageSize;
+            plates.PageSize = int.Parse(_configuration["PageSize"]);
             plates.CurrentPage = page;
 
-            response = await _httpClient.GetAsync($"http://catalog-api:80/odata/Sale");
+            response = await _httpClient.GetAsync($"{_configuration["CatalogAPIBaseUrl"]}{_odataSaleUrl}");
             var revenue = await response.Content.ReadAsStringAsync();
             var jsonDocument = JsonDocument.Parse(revenue);
             var root = jsonDocument.RootElement;
@@ -50,22 +51,22 @@ namespace WebMVC.Services
         public async Task AddLicensePlate(Plate model)
         {
             var plate = JsonSerializer.Serialize(model);
-            var response = await _httpClient.PostAsync($"http://catalog-api:80/{_odataBaseUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
+            var response = await _httpClient.PostAsync($"{_configuration["CatalogAPIBaseUrl"]}{_odataPlateUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
         }
 
-        public async Task AddPlateSale(Plate model)
+        public async Task AddPlateSale(Plate model, string discountCode)
         {
             var saleModel = new Sale
             {
                 Plate = model,
                 Id = Guid.NewGuid(),
                 SaleDate = DateTime.Now,
-                FinalSalePrice = model.SalePrice * _vatMultiplier
+                FinalSalePrice = FinalPrice(model.SalePrice, discountCode)
             };
 
             var sale = JsonSerializer.Serialize(saleModel);
-            var response = await _httpClient.PostAsync($"http://catalog-api:80/odata/Sale", new StringContent(sale, Encoding.UTF8, "application/json"));
+            var response = await _httpClient.PostAsync($"{_configuration["CatalogAPIBaseUrl"]}{_odataSaleUrl}", new StringContent(sale, Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
         }
 
@@ -73,13 +74,13 @@ namespace WebMVC.Services
         {
             model.Reserved = !model.Reserved;
             var plate = JsonSerializer.Serialize(model);
-            var response = await _httpClient.PatchAsync($"http://catalog-api:80/{_odataBaseUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
+            var response = await _httpClient.PatchAsync($"{_configuration["CatalogAPIBaseUrl"]}{_odataPlateUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
         }
 
-        private static string SetupOdataFilters(int page, SortOrder saleSortOrder, string searchText)
+        private string SetupOdataFilters(int page, SortOrder saleSortOrder, string searchText)
         {
-            int skip = (page - 1) * _pageSize;
+            int skip = (page - 1) * int.Parse(_configuration["PageSize"]);
 
             var odataOptions = $"?$count=true&$skip={skip}";
 
@@ -102,6 +103,21 @@ namespace WebMVC.Services
             }
 
             return odataOptions;
+        }
+
+        private decimal FinalPrice(decimal salePrice, string discountCode)
+        {
+            var finalPrice = salePrice * decimal.Parse(_configuration["VatMultiplier"]);
+
+            switch (discountCode)
+            {
+                case "DISCOUNT":
+                    return finalPrice -= 25M;
+                case "PERCENTOFF":
+                    return finalPrice * 0.85M;
+                default:
+                    return finalPrice;
+            }
         }
     }
 }

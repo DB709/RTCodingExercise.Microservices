@@ -16,6 +16,7 @@ using WebMVC.Services;
 using WebMVC.Models;
 using System.Linq;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace WebMVC.UnitTests
 {

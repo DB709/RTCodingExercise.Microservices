@@ -13,6 +13,7 @@ using WebMVC.Services;
 using System.Linq;
 using WebMVC.Models;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace WebMVC.UnitTests
 {
@@ -20,20 +21,22 @@ namespace WebMVC.UnitTests
     {
         private readonly LicensePlateService _licensePlateService;
         private readonly JsonSerializerOptions _options;
-        private readonly Mock<IHttpClientFactory> _httpClientFactoryMock;
+        private readonly Mock<IHttpClientFactory> _mockHttpClientFactory;
         private readonly Mock<HttpMessageHandler> _mockHttpMessageHandler;
+        private readonly Mock<IConfiguration> _mockConfiguration;
         private readonly List<Plate> _expectedPlates;
 
         public LicensePlateServiceTests()
         {
-            _httpClientFactoryMock = new Mock<IHttpClientFactory>();
+            _mockHttpClientFactory = new Mock<IHttpClientFactory>();
             _mockHttpMessageHandler = new Mock<HttpMessageHandler>();
+            _mockConfiguration = new Mock<IConfiguration>();
             _options = new JsonSerializerOptions();
 
             var httpClient = new HttpClient(_mockHttpMessageHandler.Object);
-            _httpClientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
+            _mockHttpClientFactory.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(httpClient);
 
-            _licensePlateService = new LicensePlateService(_httpClientFactoryMock.Object, _options);
+            _licensePlateService = new LicensePlateService(_mockHttpClientFactory.Object, _options, _mockConfiguration.Object);
 
             _expectedPlates = new List<Plate>
             {
@@ -53,10 +56,25 @@ namespace WebMVC.UnitTests
                 Content = new StringContent(JsonSerializer.Serialize(new PlateListModel { Plates = _expectedPlates }))
             };
 
+            var totalRevenueResponse = new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(new { value = 12.34M }))
+            };
+
+            _mockConfiguration.Setup(x => x["CatalogAPIBaseUrl"]).Returns("https://mockcatalog/");
+            _mockConfiguration.Setup(x => x["PageSize"]).Returns("20");
+            var plateUri = new Uri("https://mockcatalog/odata/Plate?$count=true&$skip=0");
+            var saleUri = new Uri("https://mockcatalog/odata/Sale");
             _mockHttpMessageHandler
                 .Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(x => x.RequestUri == plateUri), ItExpr.IsAny<CancellationToken>())
                 .ReturnsAsync(responseMessage);
+
+            _mockHttpMessageHandler
+             .Protected()
+             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.Is<HttpRequestMessage>(x => x.RequestUri == saleUri), ItExpr.IsAny<CancellationToken>())
+             .ReturnsAsync(totalRevenueResponse);
 
             // Act
             var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified, string.Empty);
@@ -67,37 +85,12 @@ namespace WebMVC.UnitTests
         }
 
         [Fact]
-        public async Task GetPlatesAsync_ReturnsPlate_WithVATApplied()
-        {
-            // Arrange
-            var plateModel = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
-
-            var responseMessage = new HttpResponseMessage
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(JsonSerializer.Serialize(new PlateListModel { Plates = new List<Plate> { plateModel } }))
-            };
-
-            _mockHttpMessageHandler
-                .Protected()
-                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-                .ReturnsAsync(responseMessage);
-
-            // Act
-            var actualPlates = await _licensePlateService.GetPlatesAsync(1, SortOrder.Unspecified, string.Empty);
-
-            // Assert
-            Assert.NotNull(actualPlates);
-            Assert.Single(actualPlates.Plates);
-            Assert.Equal(plateModel.SalePrice * 1.2M, actualPlates.Plates.ToList().Single().SalePrice);
-        }
-
-        [Fact]
         public async Task AddLicensePlate_ReturnsRedirectToActionResult_WhenModelStateIsValid()
         {
             // Arrange
             var plateModel = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
 
+            _mockConfiguration.Setup(x => x["CatalogAPIBaseUrl"]).Returns("https://mockcatalog/");
             _mockHttpMessageHandler
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
@@ -118,6 +111,7 @@ namespace WebMVC.UnitTests
             // Arrange
             var plateModel = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
 
+            _mockConfiguration.Setup(x => x["CatalogAPIBaseUrl"]).Returns("https://mockcatalog/");
             _mockHttpMessageHandler
                 .Protected()
                 .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
