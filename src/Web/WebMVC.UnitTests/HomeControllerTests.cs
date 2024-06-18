@@ -78,5 +78,22 @@ namespace WebMVC.UnitTests
             var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectToActionResult.ActionName);
         }
+
+        [Fact]
+        public async Task UpdateReservedStatus_ReturnsRedirectToActionResult_WhenModelStateIsValid()
+        {
+            // Arrange
+            var plateModel = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
+
+            _mockLicensePlateService.Setup(x => x.UpdateReservedStatus(plateModel));
+
+            // Act
+            var result = await _controller.UpdateReservedStatus(plateModel);
+
+            // Assert
+            _mockLicensePlateService.Verify(x => x.UpdateReservedStatus(plateModel), Times.Once);
+            var redirectToActionResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectToActionResult.ActionName);
+        }
     }
 }
