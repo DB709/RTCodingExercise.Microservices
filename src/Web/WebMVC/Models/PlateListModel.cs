@@ -12,5 +12,6 @@ namespace WebMVC.Models
         public int CurrentPage { get; set; }
         public int PageSize { get; set; }
         public int TotalPages => (int)Math.Ceiling(TotalPlates / (double)PageSize);
+        public decimal TotalRevenue { get; set; }
     }
 }

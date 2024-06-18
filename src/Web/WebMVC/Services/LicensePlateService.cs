@@ -34,10 +34,16 @@ namespace WebMVC.Services
                 return new PlateListModel();
             }
             
-            plates.Plates = plates.Plates.Select(x => { x.SalePrice = x.SalePrice * _vatMultiplier; return x; }).ToList();
             plates.PageSize = _pageSize;
             plates.CurrentPage = page;
 
+            response = await _httpClient.GetAsync($"http://catalog-api:80/odata/Sale");
+            var revenue = await response.Content.ReadAsStringAsync();
+            var jsonDocument = JsonDocument.Parse(revenue);
+            var root = jsonDocument.RootElement;
+            var value = root.GetProperty("value").GetDecimal();
+
+            plates.TotalRevenue = value;
             return plates;
         }
 
@@ -45,6 +51,21 @@ namespace WebMVC.Services
         {
             var plate = JsonSerializer.Serialize(model);
             var response = await _httpClient.PostAsync($"http://catalog-api:80/{_odataBaseUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+        }
+
+        public async Task AddPlateSale(Plate model)
+        {
+            var saleModel = new Sale
+            {
+                Plate = model,
+                Id = Guid.NewGuid(),
+                SaleDate = DateTime.Now,
+                FinalSalePrice = model.SalePrice * _vatMultiplier
+            };
+
+            var sale = JsonSerializer.Serialize(saleModel);
+            var response = await _httpClient.PostAsync($"http://catalog-api:80/odata/Sale", new StringContent(sale, Encoding.UTF8, "application/json"));
             response.EnsureSuccessStatusCode();
         }
 

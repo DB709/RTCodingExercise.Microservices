@@ -15,5 +15,7 @@
         public int Numbers { get; set; }
 
         public bool Reserved { get; set; }
+
+        public bool IsSold { get; set; }
     }
 }
