@@ -65,7 +65,7 @@
     <div class="form-group">
         <label>Have Discount Code?</label>
         <div class="input-group"> <input type="text" class="form-control coupon" id="discount-code" placeholder="Discount code"><span class="input-group-append"><button id="apply-discount" class="btn btn-primary btn-apply coupon">Apply</button></span></div>
-        <input type="hidden" id="applied-discount-code" name="discountCode" value="">
+        <input type="hidden" id="applied-discount-code" name="applied-discount-code" value="">
         <div id="error-message" style="color: red; display: none;">Invalid discount code</div>
     </div>
     <div>
@@ -99,7 +99,7 @@
                             <span class="discounted-price" style="display:none;"></span>
                         </td>
                         <td>@displayText</td>
-                        <td><a class="btn @buttonClass" href="@Url.Action("UpdateReservedStatus", plate)">@buttonText</a></td>
+                        <td><a class="btn @buttonClass" href="@Url.Action("UpdateReservedStatus", plate, )">@buttonText</a></td>
                     </tr>
                 }
             </tbody>
