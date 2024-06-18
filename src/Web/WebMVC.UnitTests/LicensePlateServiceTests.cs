@@ -1,13 +1,10 @@
 using Catalog.Domain;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net;
 using System.Threading.Tasks;
 using System;
 using Xunit;
-using RTCodingExercise.Microservices.Controllers;
 using Moq;
 using Moq.Protected;
 using System.Text.Json;
@@ -108,6 +105,26 @@ namespace WebMVC.UnitTests
 
             // Act
             await _licensePlateService.AddLicensePlate(plateModel);
+
+            // Assert
+            _mockHttpMessageHandler
+                .Protected()
+                .Verify<Task<HttpResponseMessage>>("SendAsync", Times.Once(), ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task UpdateReservedStatus_ReturnsRedirectToActionResult_WhenModelStateIsValid()
+        {
+            // Arrange
+            var plateModel = new Plate() { Id = Guid.NewGuid(), Registration = "LK93 XTY", Letters = "LK", Numbers = 93, PurchasePrice = 100.57M, SalePrice = 125.00M };
+
+            _mockHttpMessageHandler
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage { StatusCode = HttpStatusCode.OK });
+
+            // Act
+            await _licensePlateService.UpdateReservedStatus(plateModel);
 
             // Assert
             _mockHttpMessageHandler

@@ -42,5 +42,27 @@ namespace Catalog.API.Controllers
                 return BadRequest(ex);
             }
         }
+
+        public async Task<IActionResult> Patch([FromBody] Plate plate)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError($"Error updating license plate requested plate is not valid.");
+                    return BadRequest(ModelState);
+                }
+
+                await _licensePlatesService.UpdateLicensePlate(plate);
+
+                _logger.LogInformation($"Successfully added license plate {plate.Registration}.");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error updating license plate - {ex.Message}.");
+                return BadRequest(ex);
+            }
+        }
     }
 }

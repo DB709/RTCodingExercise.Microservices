@@ -73,15 +73,24 @@
                             <a href="@Url.Action("Index", new { salePriceOrder = SortOrder.Ascending })" class="btn btn-secondary"><i class="bi bi-arrow-up"></i></a>
                             <a href="@Url.Action("Index", new { salePriceOrder = SortOrder.Descending })" class="btn btn-secondary"><i class="bi bi-arrow-down"></i></a>
                     </th>
+                    <th>
+                        Reserved
+                    </th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var plate in Model.Plates)
                 {
+                    var displayText = plate.Reserved ? "Reserved" : "Available";
+                    var buttonText = plate.Reserved ? "Release" : "Reserve This Plate";
+                    var buttonClass = plate.Reserved ? "btn-danger" : "btn-primary";
                     <tr>
                         <td>@plate.Registration</td>
                         <td>@plate.PurchasePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
                         <td>@plate.SalePrice.ToString("C", CultureInfo.CreateSpecificCulture("en-GB"))</td>
+                        <td>@displayText</td>
+                        <td><a class="btn @buttonClass" href="@Url.Action("UpdateReservedStatus", plate)">@buttonText</a></td>
                     </tr>
                 }
             </tbody>
@@ -99,6 +108,11 @@
             $('#addLicensePlate').click(function () {
                 $('#addLicensePlateForm').show();
             });
+            $('#cancelAddLicensePlate').click(function () {
+                $('#addLicensePlateForm').hide();
+            });
+            
+            
             $('#addLicensePlateForm').validate({
                 rules: {
                     Registration: {

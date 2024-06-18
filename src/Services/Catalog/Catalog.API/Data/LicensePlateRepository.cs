@@ -16,5 +16,11 @@
             _context.Plates.Add(plate);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateLicensePlateAsync(Plate plate)
+        {
+            _context.Plates.Update(plate);
+            await _context.SaveChangesAsync();
+        }
     }
 }

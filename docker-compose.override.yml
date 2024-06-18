@@ -27,8 +27,10 @@ services:
 
   sqldata:
     environment:
+      - MSSQL_AGENT_ENABLED=true
       - SA_PASSWORD=Pass@word
       - ACCEPT_EULA=Y
+    
     ports:
       - "5433:1433"
     volumes:
