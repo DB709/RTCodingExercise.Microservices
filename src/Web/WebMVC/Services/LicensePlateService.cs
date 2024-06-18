@@ -48,6 +48,14 @@ namespace WebMVC.Services
             response.EnsureSuccessStatusCode();
         }
 
+        public async Task UpdateReservedStatus(Plate model)
+        {
+            model.Reserved = !model.Reserved;
+            var plate = JsonSerializer.Serialize(model);
+            var response = await _httpClient.PatchAsync($"http://catalog-api:80/{_odataBaseUrl}", new StringContent(plate, Encoding.UTF8, "application/json"));
+            response.EnsureSuccessStatusCode();
+        }
+
         private static string SetupOdataFilters(int page, SortOrder saleSortOrder, string searchText)
         {
             int skip = (page - 1) * _pageSize;

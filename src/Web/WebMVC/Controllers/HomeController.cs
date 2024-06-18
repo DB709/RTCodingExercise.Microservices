@@ -31,6 +31,12 @@ namespace RTCodingExercise.Microservices.Controllers
             return RedirectToAction("Index");
         }
 
+        public async Task<IActionResult> UpdateReservedStatus(Plate model)
+        {
+            await _licensePlateService.UpdateReservedStatus(model);
+            return RedirectToAction("Index");
+        }
+
         public IActionResult Privacy()
         {
             return View();
